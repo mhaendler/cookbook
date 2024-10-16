@@ -54,6 +54,11 @@
                 v-else-if="isCreate"
                 :title="t('cookbook', 'Creating new recipe')"
             />
+            <!-- Shopping List -->
+            <LocationIndicator
+                v-else-if="isShoppingList"
+                :title="t('cookbook', 'Shopping List')"
+            />
         </div>
         {{/* Primary buttons */}}
         <NcButton
@@ -235,6 +240,7 @@ const filterValue = ref('');
 /** Computed values * */
 
 const isCreate = computed(() => store.state.page === 'create');
+const isShoppingList = computed(() => store.state.page === 'shopping-list');
 const isEdit = computed(() => {
     //  A recipe is being loaded
     if (store.state.loadingRecipe) {

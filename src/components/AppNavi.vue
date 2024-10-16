@@ -78,6 +78,13 @@
         </template>
 
         <template #footer>
+            <router-link :to="'/shopping-list'">
+                <NcAppNavigationNew
+                    class="create"
+                    :text="t('cookbook', 'Shopping List')"
+                >
+                </NcAppNavigationNew>
+            </router-link>
             <NcAppNavigationNew
                 :text="t('cookbook', 'Cookbook settings')"
                 :button-class="['create', 'icon-settings']"

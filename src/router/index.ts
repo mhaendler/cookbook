@@ -12,6 +12,7 @@ import NotFound from '../components/NotFound.vue';
 import RecipeView from '../components/RecipeView/RecipeView.vue';
 import RecipeEdit from '../components/RecipeEdit.vue';
 import Search from '../components/SearchResults.vue';
+import ShoppingList from '../components/ShoppingList.vue';
 
 Vue.use(VueRouter);
 
@@ -63,6 +64,9 @@ const routes = [
 	{ path: '/recipe/:id/clone', name: 'recipe-clone', component: RecipeEdit },
 	{ path: '/recipe/:id/edit', name: 'recipe-edit', component: RecipeEdit },
 	{ path: '/recipe/:id', name: 'recipe-view', component: RecipeView },
+
+	//ShoppingList
+	{ path: '/shopping-list', name: 'shopping-list', component: ShoppingList},
 
 	// Index is the last defined route
 	{ path: '/', name: 'index', component: Index },
