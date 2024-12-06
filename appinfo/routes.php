@@ -34,6 +34,11 @@ return [
 		['name' => 'config#config', 'url' => '/webapp/config', 'verb' => 'POST'],
 		['name' => 'config#reindex', 'url' => '/webapp/reindex', 'verb' => 'POST'],
 
+		//ShoppingList
+		['name' => 'shopping_list#list', 'url' => '/webapp/shoppingList/list', 'verb' => 'GET'],
+		['name' => 'shopping_list#addItem', 'url' => '/webapp/shoppingList/addItem', 'verb' => 'POST'],
+		['name' => 'shopping_list#checkItem', 'url' => '/webapp/shoppingList/addItem', 'verb' => 'PUT'],
+
 		/* API routes */
 
 		// Generic routes on /api

@@ -60,6 +60,7 @@
 </template>
 
 <script setup>
+import { ref } from 'vue';
 import api from 'cookbook/js/api-interface';
 import { useStore } from '../store';
 import {
@@ -68,10 +69,19 @@ import {
     useRoute,
 } from 'vue-router/composables';
 
+/**
+ * @type {import('vue').Ref<boolean>}
+ */
+const isLoading = ref(false);
+
 const store = useStore();
 
 const setup = async () => {
+    isLoading.value = true;
     store.dispatch('setPage', { page: 'shopping-list' });
+
+    const response = api.shoppingList.list();
+    console.debug(response);
 };
 
 // ===================
@@ -113,11 +123,8 @@ export default {
   },
   methods: {
     fetchItems() {
-      fetch('http://nextcloud-recipe.local/api.php') // Updated API URL
-          .then(response => response.json())
-          .then(data => {
-            this.items = data;
-          });
+      response = api.shoppingList.list();
+      console.debug(response);
     },
     addItem() {
       if (!this.newItem) return;

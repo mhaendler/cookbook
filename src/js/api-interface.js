@@ -2,6 +2,7 @@ import Vue from 'vue';
 import axios from '@nextcloud/axios';
 
 import { generateUrl } from '@nextcloud/router';
+import ShoppingList from 'cookbook/components/ShoppingList.vue';
 
 const instance = axios.create();
 
@@ -112,6 +113,18 @@ function reindex() {
     return instance.post(`${baseUrl}/reindex`);
 }
 
+function getShoppingListItems(){
+    return instance.get(`${baseUrl}/shoppingList/list`);
+}
+
+function addShoppingListItem(newItem){
+    return instance.post(`${baseUrl}/shoppingList/addItem`, {item: newItem});
+}
+
+function checkShoppingListItem(item, checked){
+    return instance.post(`${baseUrl}/shoppingList/checkItem`, {item: item, checked: checked});
+}
+
 export default {
     recipes: {
         create: createNewRecipe,
@@ -131,6 +144,11 @@ export default {
     },
     keywords: {
         getAll: getAllKeywords,
+    },
+    shoppingList: {
+        list: getShoppingListItems,
+        addItem: addShoppingListItem,
+        checkItem: checkShoppingListItem,
     },
     config: {
         get: getConfig,
