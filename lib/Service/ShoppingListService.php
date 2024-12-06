@@ -80,8 +80,17 @@ class ShoppingListService {
         if(null === $file){
             return '[]';
         }
-        return explode("\n", $file->GetContent());
+        return explode("\n", trim($file->GetContent()));
     }
+
+	public function saveShoppingListItems($items){
+		$file = $this->getShoppingListFile();
+        if(null === $file){
+            return false;
+        }
+		$file->putContent(implode(PHP_EOL, $items).PHP_EOL);
+		return true;
+	}
 
 	/**
 	 * Get recipe file contents as an array

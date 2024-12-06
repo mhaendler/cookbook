@@ -125,6 +125,10 @@ function checkShoppingListItem(item, checked){
     return instance.post(`${baseUrl}/shoppingList/checkItem`, {item: item, checked: checked});
 }
 
+function deleteShoppingListItem(item, checked){
+    return instance.post(`${baseUrl}/shoppingList/deleteItem`, {item: item});
+}
+
 export default {
     recipes: {
         create: createNewRecipe,
@@ -149,6 +153,7 @@ export default {
         list: getShoppingListItems,
         addItem: addShoppingListItem,
         checkItem: checkShoppingListItem,
+        deleteItem: deleteShoppingListItem,
     },
     config: {
         get: getConfig,

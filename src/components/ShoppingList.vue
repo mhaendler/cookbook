@@ -8,7 +8,7 @@
             type="text"
             placeholder="Add a new item..."
             @input="filterSuggestions"
-            @keyup.enter="addItem"
+            @keyup.enter="addItem()"
         />
         <button class="add-button" @click="addItem">Add</button>
         </div>
@@ -29,10 +29,9 @@
     <h2 class="subtitle">Items to buy</h2>
     <ul class="item-list">
         <li v-for="item in uncheckedItems" :key="item" class="item">
-        <label>
             <input type="checkbox" @change="checkItem(item, true)" />
             <span>{{ formatItem(item) }}</span>
-        </label>
+            <button style="display: inline; margin-left: 30px; " class="delete-button" @click="deleteItem(item)">X</button>
         </li>
     </ul>
 
@@ -49,10 +48,8 @@
         <h2 class="subtitle">Bought Items</h2>
         <ul class="item-list">
         <li v-for="item in checkedItems" :key="item" class="item checked">
-            <label>
             <input type="checkbox" @change="checkItem(item, false)" checked />
             <span>{{ formatItem(item) }}</span>
-            </label>
         </li>
         </ul>
     </div>
@@ -60,7 +57,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import api from 'cookbook/js/api-interface';
 import { useStore } from '../store';
 import {
@@ -74,13 +71,112 @@ import {
  */
 const isLoading = ref(false);
 
+const newItem = ref('');
+
 const store = useStore();
+
+var shoppingListItems = ref([]);
+
+const uncheckedItems = computed(() => {
+  return shoppingListItems.value.filter(item => item.includes('[ ]'));
+});
+
+const checkedItems = computed(() => {
+  return shoppingListItems.value.filter(item => item.includes('[x]'));
+});
+
+const checkedItemsFormatted = computed(() => {
+  return checkedItems.value.map(item => formatItem(item));
+});
+
+const formatItem = (item) => {
+  let temp = item.replace(/- \[ \] /g, '').replace(/- \[x\] /g, '');
+  return temp;
+};
 
 const setup = async () => {
     isLoading.value = true;
     store.dispatch('setPage', { page: 'shopping-list' });
 
+    await fetchItems();
 };
+
+const fetchItems = async () => {
+  try {
+    const response = await api.shoppingList.list()
+    .then(response => {
+      shoppingListItems.value = response.data;
+    });
+  } catch (error) {
+    console.error('Error fetching items:', error);
+    // Handle the error, e.g., display an error message to the user
+  }
+};
+
+const addItem = () => {
+  if (!newItem.value) return;
+
+    api.shoppingList.addItem(newItem.value)
+    .then(response => {
+      // Assuming the API response includes the new item, you can directly add it to the list
+      shoppingListItems.value = response.data;
+      newItem.value = '';
+    })
+    .catch(error => {
+      console.error('Error adding item:', error);
+      // Handle the error, e.g., display an error message to the user
+    });
+};
+
+const checkItem = (item, checked) => {
+    api.shoppingList.checkItem(item, checked)
+    .then(response => {
+      shoppingListItems.value = response.data;
+    });
+};
+
+const deleteItem = (item) => {
+  // Call API to delete the item
+  api.shoppingList.deleteItem(item)
+    .then(response => {
+      shoppingListItems.value = response.data;
+    });
+};
+
+const filterSuggestions = () => {
+  if (newItem.value) {
+    return checkedItemsFormatted.value.filter(item =>
+      formatItem(item).toLowerCase().includes(newItem.value.toLowerCase())
+    );
+  } else {
+    return [];
+  }
+};
+
+const selectSuggestion = (suggestion) => {
+    // Uncheck the selected suggestion and move it back to the unchecked list
+    const itemToUncheck = shoppingListItems.value.find(item => formatItem(item) === suggestion && item.includes('[x]'));
+    if (itemToUncheck) {
+      checkItem(itemToUncheck, false); // Uncheck the item (move to unchecked)
+    }
+    newItem.value = ''; // Clear input after selecting the suggestion
+  };
+
+const filteredSuggestions = computed(() => {
+  if (newItem.value) {
+    let temp = [];
+    checkedItems.value.filter(item => {
+      const formattedItem = formatItem(item);
+      if(formattedItem.toLowerCase().includes(newItem.value.toLowerCase())){
+        temp.push(formattedItem);
+      }
+    });
+    return temp;
+  } else {
+    return [];
+  }
+});
+
 
 // ===================
 // Vue lifecycle
@@ -95,6 +191,11 @@ onBeforeRouteUpdate((to, from, next) => {
         setup();
     }
 });
+
+watch(newItem, () => {
+  filterSuggestions();
+});
+
 setup();
 </script>
 
@@ -105,70 +206,18 @@ export default {
       items: [],
       newItem: '',
       showCheckedItems: true, // Control the visibility of the Checked Items section
-      filteredSuggestions: [], // For autocomplete suggestions
     };
   },
-  computed: {
-    uncheckedItems() {
-      return this.items.filter(item => item.includes('[ ]'));
-    },
-    checkedItems() {
-      return this.items.filter(item => item.includes('[x]'));
-    },
-    checkedItemsFormatted() {
-      return this.checkedItems.map(item => this.formatItem(item));
-    },
-  },
   methods: {
-    fetchItems() {
-      response = api.shoppingList.list();
-      const response = api.shoppingList.list().then(response => {
-        this.items = response.data;
-      });
-      
-    },
-    addItem() {
-      if (!this.newItem) return;
-      fetch('http://nextcloud-recipe.local/api.php', { // Updated API URL
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({item: this.newItem}),
-      }).then(this.fetchItems);
-      this.newItem = '';
-      this.filteredSuggestions = []; // Clear suggestions after adding the item
-    },
-    checkItem(item, checked) {
-      fetch('http://nextcloud-recipe.local/api.php', { // Updated API URL
-        method: 'PUT',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({item: item, checked: checked}),
-      }).then(this.fetchItems);
-    },
+    
+    
+    
     toggleCheckedItems() {
       this.showCheckedItems = !this.showCheckedItems;
     },
-    formatItem(item) {
-      return item.replace('- [ ]', '').replace('- [x]', '');
-    },
-    filterSuggestions() {
-      // Filter checked items based on the newItem input value
-      if (this.newItem) {
-        this.filteredSuggestions = this.checkedItemsFormatted.filter(item =>
-            item.toLowerCase().includes(this.newItem.toLowerCase())
-        );
-      } else {
-        this.filteredSuggestions = [];
-      }
-    },
-    selectSuggestion(suggestion) {
-      // Uncheck the selected suggestion and move it back to the unchecked list
-      const itemToUncheck = this.items.find(item => this.formatItem(item) === suggestion && item.includes('[x]'));
-      if (itemToUncheck) {
-        this.checkItem(itemToUncheck, false); // Uncheck the item (move to unchecked)
-      }
-      this.newItem = ''; // Clear input after selecting the suggestion
-      this.filteredSuggestions = []; // Clear suggestions after selecting
-    },
+   
+    
+    
   },
   mounted() {
     //this.fetchItems();
@@ -176,7 +225,7 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .wrapper {
     width: 100%;
     padding: 1rem;
@@ -217,13 +266,10 @@ export default {
 }
 
 .item {
+ display: flex;
+  align-items: center;
   margin: 10px 0;
   font-size: 16px;
-}
-
-.item label {
-  display: flex;
-  align-items: center;
 }
 
 .item input[type='checkbox'] {
@@ -301,5 +347,10 @@ export default {
 
 .toggle-button:hover {
   background-color: #218838;
+}
+
+.delete-button{
+  display: inline;
+  margin-left: 25px;
 }
 </style>

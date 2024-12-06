@@ -47,4 +47,13 @@ class ShoppingListController extends Controller {
 	public function checkItem() {
 		return $this->impl->checkItem();
 	}
+
+	/**
+	 * @NoAdminRequired
+	 * @NoCSRFRequired
+	 * @return JSONResponse
+	 */
+	public function deleteItem() {
+		return $this->impl->deleteItem();
+	}
 }

@@ -20,12 +20,17 @@ class ShoppingListImplementation {
 	/** @var IRequest */
 	private $request;
 
+	/** @var RestParameterParser */
+	private $restParser;
+
 	public function __construct(
 		IRequest $request,
 		ShoppingListService $shoppingListService,
+		RestParameterParser $restParameterParser,
 	) {
 		$this->request = $request;
 		$this->shoppingListService = $shoppingListService;
+		$this->restParser = $restParameterParser;
 	}
 
 	/**
@@ -47,13 +52,54 @@ class ShoppingListImplementation {
 	 * @return JSONResponse
 	 */
 	public function addItem() {
-		die(__FUNCTION__);
+		$data = $this->restParser->getParameters();
+		$newItem = "- [ ] " . $data['item'];
+		$shoppingListItems = $this->shoppingListService->getShoppingListItems();
+		$shoppingListItems[] = $newItem;
+		$this->shoppingListService->saveShoppingListItems($shoppingListItems);
+		return new JSONResponse($shoppingListItems, Http::STATUS_OK);
 	}
 
     /**
      * Checks a item from the shopping list
      */
     public function checkItem() {
-		die(__FUNCTION__);
+		// Update an item (check/uncheck)
+		$data = $this->restParser->getParameters();
+	
+		$itemToUpdate = $data['item'];
+		$checked = $data['checked'];
+	
+		$shoppingListItems = $this->shoppingListService->getShoppingListItems();
+		$newList = [];
+		foreach ($shoppingListItems as $item) {
+			if (strpos($item, $itemToUpdate) !== false) {
+				$item = $checked ? str_replace('[ ]', '[x]', $item) : str_replace('[x]', '[ ]', $item);
+			}
+			$newList[] = $item;
+		}
+		$this->shoppingListService->saveShoppingListItems($newList);
+		return new JSONResponse($newList, Http::STATUS_OK);
+	}
+
+	/**
+     * Deletes a item from the shopping list
+     */
+    public function deleteItem() {
+		// Update an item (check/uncheck)
+		$data = $this->restParser->getParameters();
+	
+		$itemToDelete = $data['item'];
+
+		$shoppingListItems = $this->shoppingListService->getShoppingListItems();
+
+		$newList = [];
+		foreach ($shoppingListItems as $item) {
+			if (strpos($item, $itemToDelete) === false) {
+				$newList[] = $item;
+			}
+		}
+		$this->shoppingListService->saveShoppingListItems($newList);
+		return new JSONResponse($newList, Http::STATUS_OK);
 	}
 }

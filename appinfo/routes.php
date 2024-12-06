@@ -37,7 +37,8 @@ return [
 		//ShoppingList
 		['name' => 'shopping_list#list', 'url' => '/webapp/shoppingList/list', 'verb' => 'GET'],
 		['name' => 'shopping_list#addItem', 'url' => '/webapp/shoppingList/addItem', 'verb' => 'POST'],
-		['name' => 'shopping_list#checkItem', 'url' => '/webapp/shoppingList/addItem', 'verb' => 'PUT'],
+		['name' => 'shopping_list#checkItem', 'url' => '/webapp/shoppingList/checkItem', 'verb' => 'POST'],
+		['name' => 'shopping_list#deleteItem', 'url' => '/webapp/shoppingList/deleteItem', 'verb' => 'POST'],
 
 		/* API routes */
 
