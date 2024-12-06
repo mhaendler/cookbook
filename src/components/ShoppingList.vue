@@ -80,8 +80,6 @@ const setup = async () => {
     isLoading.value = true;
     store.dispatch('setPage', { page: 'shopping-list' });
 
-    const response = api.shoppingList.list();
-    console.debug(response);
 };
 
 // ===================
@@ -124,7 +122,10 @@ export default {
   methods: {
     fetchItems() {
       response = api.shoppingList.list();
-      console.debug(response);
+      const response = api.shoppingList.list().then(response => {
+        this.items = response.data;
+      });
+      
     },
     addItem() {
       if (!this.newItem) return;

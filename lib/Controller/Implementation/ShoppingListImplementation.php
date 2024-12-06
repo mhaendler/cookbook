@@ -7,20 +7,25 @@ use OCA\Cookbook\Service\DbCacheService;
 use OCA\Cookbook\Service\RecipeService;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
+use OCP\IRequest;
+use OCA\Cookbook\Service\ShoppingListService;
 
 class ShoppingListImplementation {
+
 	
-	/** @var UserFolderHelper */
-	private $userFolder;
+	
+	/** @var ShoppingListService */
+	private $shoppingListService;
 
 	/** @var IRequest */
 	private $request;
 
 	public function __construct(
 		IRequest $request,
-		UserFolderHelper $userFolder,
+		ShoppingListService $shoppingListService,
 	) {
 		$this->request = $request;
+		$this->shoppingListService = $shoppingListService;
 	}
 
 	/**
@@ -29,7 +34,12 @@ class ShoppingListImplementation {
 	 * @return JSONResponse
 	 */
 	public function list() {
-		die(__FUNCTION__);
+		if(false === $this->shoppingListService->checkIfFileExists()){
+			$this->shoppingListService->createShoppingListFile();
+		}
+		
+		$shoppingListItems = $this->shoppingListService->getShoppingListItems();
+		return new JSONResponse($shoppingListItems, Http::STATUS_OK);
 	}
 
 	/**

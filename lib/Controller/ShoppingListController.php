@@ -23,7 +23,7 @@ class ShoppingListController extends Controller {
 
 	/**
 	 * @NoAdminRequired
-	 *
+	 * @NoCSRFRequired
 	 * @return JSONResponse
 	 */
 	public function list() {
@@ -32,14 +32,16 @@ class ShoppingListController extends Controller {
 
 	/**
 	 * @NoAdminRequired
+	 * @NoCSRFRequired
 	 * @return JSONResponse
 	 */
 	public function addItem() {
 		return $this->impl->addItem();
 	}
 
-    /**
+	/**
 	 * @NoAdminRequired
+	 * @NoCSRFRequired
 	 * @return JSONResponse
 	 */
 	public function checkItem() {
